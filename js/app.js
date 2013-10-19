@@ -12,6 +12,22 @@ $(function(){
 
   var KeywordView = Backbone.View.extend({
     tagName: 'div',
+    initialize: function(){
+      $(this.el).attr("draggable", "true");
+      $(this.el).bind("dragstart", _.bind(this.dragStartEvent, this));
+    },
+    dragStartEvent: function (e) {
+      var data;
+      if (e.originalEvent) e = e.originalEvent;
+      e.dataTransfer.effectAllowed = "copy"; // default to copy
+      data = this.dragStart(e.dataTransfer, e);
+   
+      window._backboneDragDropObject = null;
+      if (data !== undefined) {
+        window._backboneDragDropObject = data; // we cant bind an object directly because it has to be a string, json just won't do
+      }
+    },
+    dragStart: function (dataTransfer, e) {},
     render: function(){
       var el = $(this.el);
       var text = $('<p>').text(this.model.get('name'))
