@@ -18,3 +18,13 @@
   margin-left:10px;
 }
 
+.BentoHeader{
+  font-size: 26px;
+  font-family: Arial;
+  text-decoration: underline;
+}
+
+.keyword{
+  font-size: 26px;
+  font-family: Arial;
+}
