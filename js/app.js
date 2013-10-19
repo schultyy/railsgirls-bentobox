@@ -1,9 +1,15 @@
 $(function(){
   var Keyword = Backbone.Model.extend({});
-  var Category = Backbone.Model.extend({});
+  
 
   var KeywordCollection = Backbone.Collection.extend({
     model: Keyword
+  });
+
+  var Category = Backbone.Model.extend({
+    defaults: {
+      keywords: new KeywordCollection()
+    }
   });
 
   var CategoryCollection = Backbone.Collection.extend({
@@ -27,7 +33,7 @@ $(function(){
         window._backboneDragDropObject = data; // we cant bind an object directly because it has to be a string, json just won't do
       }
     },
-    dragStart: function (dataTransfer, e) {},
+    dragStart: function (dataTransfer, e) { return this.model; },
     render: function(){
       var el = $(this.el);
       var text = $('<p>').text(this.model.get('name'))
@@ -60,6 +66,8 @@ $(function(){
       $(this.el).bind("dragleave", _.bind(this.dragLeaveEvent, this));
       $(this.el).bind("drop", _.bind(this.dropEvent, this));
       this._draghoverClassAdded = false;
+      _.bindAll(this, "render");
+      this.model.get("keywords").bind("add", this.render);
     },
     dragOverEvent: function (e) {
       if (e.originalEvent) e = e.originalEvent;
@@ -102,7 +110,8 @@ $(function(){
       this.drop(data, e.dataTransfer, e);
     },
     drop: function(data, dataTransfer, e){
-
+      var keywords = this.model.get('keywords');
+      keywords.add(data);
     },
     dragOver: function (data, dataTransfer, e) { // optionally override me and set dataTransfer.dropEffect, return false if the data is not droppable
       $(this.el).addClass("draghover");
@@ -114,9 +123,17 @@ $(function(){
       }
     },
     render: function(){
+      $(this.el).empty();
       var heading = $('<p>').addClass('BentoHeader')
                             .text(this.model.get('name'));
       $(this.el).append(heading);
+      var el = $(this.el);
+
+      this.model.get('keywords').forEach(function(model){
+        var keyword = new KeywordView({model: model});
+
+        el.append(keyword.render().el);
+      });
       return this;
     }
   });
