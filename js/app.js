@@ -54,6 +54,65 @@ $(function(){
   var BentoBoxColumn = Backbone.View.extend({
     tagName: 'div',
     className: 'col-md-2',
+    initialize: function(){
+      $(this.el).bind("dragover", _.bind(this.dragOverEvent, this));
+      $(this.el).bind("dragenter", _.bind(this.dragEnterEvent, this));
+      $(this.el).bind("dragleave", _.bind(this.dragLeaveEvent, this));
+      $(this.el).bind("drop", _.bind(this.dropEvent, this));
+      this._draghoverClassAdded = false;
+    },
+    dragOverEvent: function (e) {
+      if (e.originalEvent) e = e.originalEvent;
+      var data = this.getCurrentDragData(e);
+      
+      if (this.dragOver(data, e.dataTransfer, e) !== false) {
+        if (e.preventDefault) e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy'; // default
+      }
+    },
+    dragEnterEvent: function (e) {
+      if (e.originalEvent) e = e.originalEvent;
+      if (e.preventDefault) e.preventDefault();
+    },
+    dragLeaveEvent: function (e) {
+      if (e.originalEvent) e = e.originalEvent;
+      var data = this.getCurrentDragData(e);
+      this.dragLeave(data, e.dataTransfer, e);
+    },
+    getCurrentDragData: function (e) {
+      var data = null;
+      if (window._backboneDragDropObject){
+        data = window._backboneDragDropObject;
+      }
+      return data;
+    },
+    dropEvent: function (e) {
+      if (e.originalEvent){
+        e = e.originalEvent;
+      }
+      var data = this.getCurrentDragData(e);
+      
+      if (e.preventDefault) e.preventDefault();
+      if (e.stopPropagation) e.stopPropagation(); // stops the browser from redirecting
+   
+      if (this._draghoverClassAdded){
+        $(this.el).removeClass("draghover");
+      }
+   
+      this.drop(data, e.dataTransfer, e);
+    },
+    drop: function(data, dataTransfer, e){
+
+    },
+    dragOver: function (data, dataTransfer, e) { // optionally override me and set dataTransfer.dropEffect, return false if the data is not droppable
+      $(this.el).addClass("draghover");
+      this._draghoverClassAdded = true;
+    },
+    dragLeave: function (data, dataTransfer, e) { // optionally override me
+      if (this._draghoverClassAdded){
+        $(this.el).removeClass("draghover");
+      }
+    },
     render: function(){
       var heading = $('<p>').addClass('BentoHeader')
                             .text(this.model.get('name'));
